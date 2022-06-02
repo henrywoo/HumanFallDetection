@@ -19,7 +19,8 @@ import math
 
 def get_source(args):
     tagged_df = None
-    if args.video is None:
+    #if args.video is None:
+    if 1:
         cam = cv2.VideoCapture(0)
     else:
         logging.debug(f'Video source: {args.video}')
@@ -27,10 +28,8 @@ def get_source(args):
         if isinstance(args.video, str):
             vid = [int(s) for s in re.findall(r'\d+', args.video)]
             if len(vid) == 5:
-                tagged_df = pd.read_csv("dataset/CompleteDataSet.csv", usecols=[
-                                        "TimeStamps", "Subject", "Activity", "Trial", "Tag"], skipinitialspace=True)
-                tagged_df = tagged_df.query(
-                    f'Subject == {vid[1]} & Activity == {vid[0]} & Trial == {vid[2]}')
+                tagged_df = pd.read_csv("dataset/CompleteDataSet.csv", usecols=["TimeStamps", "Subject", "Activity", "Trial", "Tag"], skipinitialspace=True)
+                tagged_df = tagged_df.query(f'Subject == {vid[1]} & Activity == {vid[0]} & Trial == {vid[2]}')
     img = cam.read()[1]
     logging.debug('Image shape:', img.shape)
     return cam, tagged_df
@@ -141,8 +140,12 @@ def show_tracked_img(img_dict, ip_set, num_matched, output_video, args):
 
     if output_video is None:
         if args.save_output:
+            print("args.video", args.video)
             vidname = args.video.split('/')
-            output_video = cv2.VideoWriter(filename='/'.join(vidname[:-1])+'/out'+vidname[-1][:-3]+'avi', fourcc=cv2.VideoWriter_fourcc(*'MP42'),
+            #vidname=["fuheng", "wu.avi"]
+            fname='/'.join(vidname[:-1])+'/out'+vidname[-1][:-3]+'avi'
+            print("fname:", fname)
+            output_video = cv2.VideoWriter(filename=fname, fourcc=cv2.VideoWriter_fourcc(*'MP42'),
                                            fps=args.fps, frameSize=img.shape[:2][::-1])
             logging.debug(
                 f'Saving the output video at {args.out_path} with {args.fps} frames per seconds')
@@ -250,7 +253,6 @@ def alg2_sequential(queues, argss, consecutive_frames, event):
     window_names = [args.video if isinstance(args.video, str) else 'Cam '+str(args.video) for args in argss]
     [cv2.namedWindow(window_name) for window_name in window_names]
     while True:
-
         # if not queue1.empty() and not queue2.empty():
         if not any(q.empty() for q in queues):
             dict_frames = [q.get() for q in queues]

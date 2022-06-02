@@ -58,8 +58,8 @@ class FallDetector:
                               help='Save the result in a video file. Output videos are saved in the same directory as input videos with "out" appended at the start of the title')
         vis_args.add_argument('--fps', default=18, type=int,
                               help='FPS for the output video.')
-        # vis_args.add_argument('--out-path', default='result.avi', type=str,
-        #                       help='Save the output video at the path specified. .avi file format.')
+        vis_args.add_argument('--out-path', default='result.avi', type=str,
+                               help='Save the output video at the path specified. .avi file format.')
 
         args = parser.parse_args()
 
@@ -95,14 +95,12 @@ class FallDetector:
         if self.args.num_cams == 1:
             if self.args.video is None:
                 argss[0].video = 0
-            process1 = mp.Process(target=extract_keypoints_parallel,
-                                  args=(queues[0], argss[0], counter1, counter2, self.consecutive_frames, e))
+            process1 = mp.Process(target=extract_keypoints_parallel, args=(queues[0], argss[0], counter1, counter2, self.consecutive_frames, e))
             process1.start()
             if self.args.coco_points:
                 process1.join()
             else:
-                process2 = mp.Process(target=alg2_sequential, args=(queues, argss,
-                                                                    self.consecutive_frames, e))
+                process2 = mp.Process(target=alg2_sequential, args=(queues, argss, self.consecutive_frames, e))
                 process2.start()
             process1.join()
         elif self.args.num_cams == 2:
@@ -120,18 +118,15 @@ class FallDetector:
                     print('Error: argument --video not properly set')
                     print('For 2 video fall detection(--num_cams=2), save your videos as abc1.xyz & abc2.xyz and set --video=abc.xyz')
                     return
-            process1_1 = mp.Process(target=extract_keypoints_parallel,
-                                    args=(queues[0], argss[0], counter1, counter2, self.consecutive_frames, e))
-            process1_2 = mp.Process(target=extract_keypoints_parallel,
-                                    args=(queues[1], argss[1], counter2, counter1, self.consecutive_frames, e))
+            process1_1 = mp.Process(target=extract_keypoints_parallel, args=(queues[0], argss[0], counter1, counter2, self.consecutive_frames, e))
+            process1_2 = mp.Process(target=extract_keypoints_parallel, args=(queues[1], argss[1], counter2, counter1, self.consecutive_frames, e))
             process1_1.start()
             process1_2.start()
             if self.args.coco_points:
                 process1_1.join()
                 process1_2.join()
             else:
-                process2 = mp.Process(target=alg2_sequential, args=(queues, argss,
-                                                                    self.consecutive_frames, e))
+                process2 = mp.Process(target=alg2_sequential, args=(queues, argss, self.consecutive_frames, e))
                 process2.start()
             process1_1.join()
             process1_2.join()
